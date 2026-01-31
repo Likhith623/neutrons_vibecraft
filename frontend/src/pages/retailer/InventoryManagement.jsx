@@ -62,8 +62,53 @@ const InventoryManagement = () => {
   useEffect(() => {
     if (selectedStore) {
       fetchMedicines();
+      // Check and remove expired medicines
+      removeExpiredMedicines();
     }
   }, [selectedStore]);
+
+  // Function to remove expired medicines automatically
+  const removeExpiredMedicines = async () => {
+    if (!selectedStore) return;
+    
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Get expired medicines
+      const { data: expiredMeds, error: fetchError } = await supabase
+        .from('medicines')
+        .select('id, name')
+        .eq('store_id', selectedStore)
+        .lt('expiry_date', today)
+        .not('expiry_date', 'is', null);
+      
+      if (fetchError) {
+        console.error('Error fetching expired medicines:', fetchError);
+        return;
+      }
+      
+      if (expiredMeds && expiredMeds.length > 0) {
+        // Delete expired medicines
+        const { error: deleteError } = await supabase
+          .from('medicines')
+          .delete()
+          .eq('store_id', selectedStore)
+          .lt('expiry_date', today);
+        
+        if (deleteError) {
+          console.error('Error deleting expired medicines:', deleteError);
+        } else {
+          const names = expiredMeds.map(m => m.name).join(', ');
+          toast(`Removed ${expiredMeds.length} expired medicine(s): ${names}`, { 
+            icon: '⚠️',
+            duration: 5000 
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error in removeExpiredMedicines:', error);
+    }
+  };
 
   const fetchInitialData = async () => {
     if (!user) return;
@@ -194,6 +239,20 @@ const InventoryManagement = () => {
       return;
     }
 
+    // Validate required fields
+    if (!formData.name?.trim()) {
+      toast.error('Medicine name is required');
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      toast.error('Please enter a valid price');
+      return;
+    }
+    if (formData.quantity === '' || parseInt(formData.quantity) < 0) {
+      toast.error('Please enter a valid quantity');
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -201,26 +260,35 @@ const InventoryManagement = () => {
 
       // Upload image if selected
       if (imageFile) {
-        const filePath = `${user.id}/${Date.now()}-${imageFile.name}`;
-        imageUrl = await uploadImage('medicine-images', filePath, imageFile);
+        try {
+          const timestamp = Date.now();
+          const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filePath = `${user.id}/${timestamp}-${safeName}`;
+          imageUrl = await uploadImage('medicine-images', filePath, imageFile);
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          // Continue without image if upload fails
+          toast.error('Image upload failed, saving without image');
+          imageUrl = editingMedicine?.image_url || null;
+        }
       }
 
       const medicineData = {
         store_id: selectedStore,
-        name: formData.name,
-        generic_name: formData.generic_name || null,
-        manufacturer: formData.manufacturer || null,
-        description: formData.description || null,
-        dosage: formData.dosage || null,
+        name: formData.name.trim(),
+        generic_name: formData.generic_name?.trim() || null,
+        manufacturer: formData.manufacturer?.trim() || null,
+        description: formData.description?.trim() || null,
+        dosage: formData.dosage?.trim() || null,
         price: parseFloat(formData.price),
-        quantity: parseInt(formData.quantity),
-        unit: formData.unit,
+        quantity: parseInt(formData.quantity) || 0,
+        unit: formData.unit || 'units',
         expiry_date: formData.expiry_date || null,
-        batch_number: formData.batch_number || null,
-        requires_prescription: formData.requires_prescription,
-        min_stock_alert: parseInt(formData.min_stock_alert),
+        batch_number: formData.batch_number?.trim() || null,
+        requires_prescription: formData.requires_prescription || false,
+        min_stock_alert: parseInt(formData.min_stock_alert) || 10,
         category_id: formData.category_id || null,
-        is_available: formData.is_available,
+        is_available: formData.is_available !== false,
         image_url: imageUrl,
       };
 
@@ -250,7 +318,9 @@ const InventoryManagement = () => {
   };
 
   const handleDelete = async (medicineId) => {
-    if (!confirm('Are you sure you want to delete this medicine?')) {
+    // Use window.confirm for safe confirmation dialog
+    const confirmed = window.confirm('Are you sure you want to delete this medicine? This action cannot be undone.');
+    if (!confirmed) {
       return;
     }
 
@@ -260,12 +330,17 @@ const InventoryManagement = () => {
         .delete()
         .eq('id', medicineId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      
       toast.success('Medicine deleted successfully');
-      fetchMedicines();
+      // Update local state immediately for better UX
+      setMedicines(prev => prev.filter(m => m.id !== medicineId));
     } catch (error) {
       console.error('Error deleting medicine:', error);
-      toast.error('Failed to delete medicine');
+      toast.error(error.message || 'Failed to delete medicine');
     }
   };
 
@@ -516,12 +591,12 @@ const InventoryManagement = () => {
                 }`}
               >
                 {/* Medicine Image */}
-                <div className="h-32 bg-gradient-to-br from-primary-500/20 to-purple-600/20 relative">
+                <div className="h-36 bg-gradient-to-br from-primary-500/20 to-purple-600/20 relative flex items-center justify-center">
                   {medicine.image_url ? (
                     <img
                       src={medicine.image_url}
                       alt={medicine.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-2"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -652,30 +727,32 @@ const InventoryManagement = () => {
                     {/* Medicine Image */}
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Medicine Image
+                        Medicine Image (Single image only)
                       </label>
                       <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden">
+                        <div className="w-24 h-24 rounded-xl bg-white/10 flex items-center justify-center overflow-hidden border border-white/20">
                           {imagePreview ? (
                             <img
                               src={imagePreview}
                               alt="Preview"
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain bg-black/20"
                             />
                           ) : (
-                            <Upload size={20} className="text-white/30" />
+                            <Upload size={24} className="text-white/30" />
                           )}
                         </div>
-                        <label className="glass-button-secondary cursor-pointer text-sm">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="hidden"
-                          />
-                          <Upload size={16} className="inline mr-2" />
-                          Upload
-                        </label>
+                        <div className="flex flex-col gap-2">
+                          <label className="glass-button-secondary cursor-pointer text-sm">
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
+                            <Upload size={16} className="inline mr-2" />
+                            Upload
+                          </label>
+                        </div>
                       </div>
                     </div>
 
@@ -803,11 +880,28 @@ const InventoryManagement = () => {
                         >
                           <option value="strips">Strips</option>
                           <option value="tablets">Tablets</option>
+                          <option value="capsules">Capsules</option>
                           <option value="bottles">Bottles</option>
                           <option value="vials">Vials</option>
                           <option value="tubes">Tubes</option>
+                          <option value="gels">Gels</option>
+                          <option value="creams">Creams</option>
+                          <option value="lotions">Lotions</option>
+                          <option value="ointments">Ointments</option>
+                          <option value="syrups">Syrups</option>
+                          <option value="drops">Drops</option>
+                          <option value="injections">Injections</option>
+                          <option value="inhalers">Inhalers</option>
+                          <option value="sprays">Sprays</option>
+                          <option value="patches">Patches</option>
+                          <option value="sachets">Sachets</option>
+                          <option value="powders">Powders</option>
+                          <option value="solutions">Solutions</option>
+                          <option value="suspensions">Suspensions</option>
+                          <option value="suppositories">Suppositories</option>
                           <option value="packs">Packs</option>
                           <option value="pieces">Pieces</option>
+                          <option value="units">Units</option>
                         </select>
                       </div>
                     </div>

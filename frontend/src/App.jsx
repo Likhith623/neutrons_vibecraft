@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Component } from 'react';
 import { Toaster } from 'react-hot-toast';
 import useAuthStore from './store/authStore';
 
@@ -19,6 +19,48 @@ import StoreManagement from './pages/retailer/StoreManagement';
 import InventoryManagement from './pages/retailer/InventoryManagement';
 import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
+
+// Error Boundary Component to prevent full app crashes
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('App Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          <div className="glass-card p-8 max-w-md text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/20 flex items-center justify-center">
+              <span className="text-3xl">⚠️</span>
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+            <p className="text-white/60 mb-4">
+              We encountered an unexpected error. Please refresh the page to continue.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="glass-button"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -67,13 +109,18 @@ const PublicRoute = ({ children }) => {
 };
 
 function App() {
-  const { initialize, loading } = useAuthStore();
+  const { initialize, loading, user, profile } = useAuthStore();
 
   useEffect(() => {
+    // Initialize auth on mount
     initialize();
-  }, [initialize]);
+  }, []);
 
-  if (loading) {
+  // Show loading only if we don't have cached user data
+  // This makes reloads instant when user is already logged in
+  const showLoading = loading && !user && !profile;
+
+  if (showLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="text-center">
@@ -85,31 +132,32 @@ function App() {
   }
 
   return (
-    <Router>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          className: 'glass',
-          style: {
-            background: 'rgba(15, 23, 42, 0.9)',
-            color: 'white',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-          },
-          success: {
-            iconTheme: {
-              primary: '#10b981',
-              secondary: 'white',
+    <ErrorBoundary>
+      <Router>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: 'glass',
+            style: {
+              background: 'rgba(15, 23, 42, 0.9)',
+              color: 'white',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
             },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: 'white',
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: 'white',
+              },
             },
-          },
-        }}
-      />
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: 'white',
+              },
+            },
+          }}
+        />
 
       {/* Floating background elements */}
       <div className="floating-bg bg-primary-500 top-0 left-0" />
@@ -208,6 +256,7 @@ function App() {
       {/* Global Chatbot - Available on all pages */}
       <ChatbotWrapper />
     </Router>
+    </ErrorBoundary>
   );
 }
 

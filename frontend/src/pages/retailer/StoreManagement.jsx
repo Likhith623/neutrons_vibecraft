@@ -163,6 +163,25 @@ const StoreManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.store_name?.trim()) {
+      toast.error('Store name is required');
+      return;
+    }
+    if (!formData.address?.trim() || !formData.city?.trim() || !formData.state?.trim()) {
+      toast.error('Please fill in all address fields');
+      return;
+    }
+    if (!formData.latitude || !formData.longitude) {
+      toast.error('Please set your store location');
+      return;
+    }
+    if (!formData.phone?.trim()) {
+      toast.error('Phone number is required');
+      return;
+    }
+    
     setSaving(true);
 
     try {
@@ -170,14 +189,33 @@ const StoreManagement = () => {
 
       // Upload image if selected
       if (imageFile) {
-        const filePath = `${user.id}/${Date.now()}-${imageFile.name}`;
-        imageUrl = await uploadImage('store-images', filePath, imageFile);
+        try {
+          const timestamp = Date.now();
+          const safeName = imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const filePath = `${user.id}/${timestamp}-${safeName}`;
+          imageUrl = await uploadImage('store-images', filePath, imageFile);
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          toast.error('Image upload failed, saving without image');
+          imageUrl = editingStore?.store_image_url || null;
+        }
       }
 
       const storeData = {
-        ...formData,
+        store_name: formData.store_name.trim(),
+        description: formData.description?.trim() || null,
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state.trim(),
+        pincode: formData.pincode?.trim() || null,
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
+        phone: formData.phone.trim(),
+        email: formData.email?.trim() || null,
+        license_number: formData.license_number?.trim() || null,
+        opening_time: formData.opening_time || '09:00',
+        closing_time: formData.closing_time || '21:00',
+        is_open: formData.is_open !== false,
         store_image_url: imageUrl,
         owner_id: user.id,
       };
@@ -208,19 +246,25 @@ const StoreManagement = () => {
   };
 
   const handleDelete = async (storeId) => {
-    if (!confirm('Are you sure you want to delete this store? All medicines will also be deleted.')) {
+    const confirmed = window.confirm('Are you sure you want to delete this store? All medicines will also be deleted.');
+    if (!confirmed) {
       return;
     }
 
     try {
       const { error } = await supabase.from('stores').delete().eq('id', storeId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+      
       toast.success('Store deleted successfully');
-      fetchStores();
+      // Update local state immediately
+      setStores(prev => prev.filter(s => s.id !== storeId));
     } catch (error) {
       console.error('Error deleting store:', error);
-      toast.error('Failed to delete store');
+      toast.error(error.message || 'Failed to delete store');
     }
   };
 

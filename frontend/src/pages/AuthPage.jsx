@@ -40,9 +40,16 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      setLoading(false);
+      toast.error('Request is taking too long. Please try again.');
+    }, 15000);
+
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
+        clearTimeout(loadingTimeout);
         toast.success('Welcome back!');
       } else {
         await register(
@@ -52,21 +59,20 @@ const AuthPage = () => {
           selectedRole,
           formData.phone
         );
+        clearTimeout(loadingTimeout);
         toast.success('Account created successfully!');
       }
       
-      // Navigate based on role after a short delay
-      setTimeout(() => {
-        const profile = useAuthStore.getState().profile;
-        if (profile?.role === 'retailer') {
-          navigate('/retailer/dashboard');
-        } else {
-          navigate('/customer/dashboard');
-        }
-      }, 500);
+      // Navigate immediately - don't wait
+      const profile = useAuthStore.getState().profile;
+      if (profile?.role === 'retailer') {
+        navigate('/retailer/dashboard');
+      } else {
+        navigate('/customer/dashboard');
+      }
     } catch (error) {
+      clearTimeout(loadingTimeout);
       toast.error(error.message || 'Authentication failed');
-    } finally {
       setLoading(false);
     }
   };

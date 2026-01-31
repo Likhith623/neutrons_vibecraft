@@ -1,7 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from datetime import date
 from app.config import settings
 from app.routes import auth, stores, medicines, upload, customer
+from app.database import supabase_admin
+
+
+# Startup function to clean expired medicines
+async def cleanup_expired_medicines():
+    """Remove medicines that have passed their expiry date"""
+    try:
+        today = date.today().isoformat()
+        result = supabase_admin.table("medicines").delete().lt("expiry_date", today).execute()
+        if result.data:
+            print(f"Cleaned up {len(result.data)} expired medicines on startup")
+    except Exception as e:
+        print(f"Warning: Could not clean expired medicines: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await cleanup_expired_medicines()
+    yield
+    # Shutdown
+    pass
+
 
 # Create FastAPI app
 app = FastAPI(
@@ -9,7 +34,8 @@ app = FastAPI(
     description="API for finding medicines in nearby stores during emergencies",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -18,8 +44,10 @@ app.add_middleware(
     allow_origins=[
         settings.frontend_url,
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
         "http://127.0.0.1:3000"
     ],
     allow_credentials=True,

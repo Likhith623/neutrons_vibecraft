@@ -192,9 +192,9 @@ const HomePage = () => {
                 <motion.div
                   animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute -bottom-8 -left-8 w-20 h-20 rounded-2xl glass flex items-center justify-center"
+                  className="absolute -bottom-4 -left-4 w-16 h-16 rounded-2xl glass flex items-center justify-center z-0 opacity-80 hidden lg:flex"
                 >
-                  <Heart size={32} className="text-red-500" />
+                  <Heart size={24} className="text-red-500" />
                 </motion.div>
               </div>
             </motion.div>

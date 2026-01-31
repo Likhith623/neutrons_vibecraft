@@ -9,22 +9,79 @@ const useAuthStore = create(
       profile: null,
       session: null,
       loading: true,
+      initialized: false,
       error: null,
 
-      // Initialize auth state
+      // Initialize auth state - optimized for speed
       initialize: async () => {
+        // If already initialized, don't do it again
+        if (get().initialized) {
+          set({ loading: false });
+          return;
+        }
+
         try {
+          // First, check if we have cached data from persist
+          const cachedUser = get().user;
+          const cachedProfile = get().profile;
+          
+          // If we have cached data, use it immediately (no loading state!)
+          if (cachedUser && cachedProfile) {
+            set({ loading: false, initialized: true });
+            
+            // Then verify session in background (don't block UI)
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              if (session?.user) {
+                // Session still valid, optionally refresh profile
+                getProfile(session.user.id).then(profile => {
+                  if (profile) {
+                    set({ profile, session, user: session.user });
+                  }
+                }).catch(() => {});
+              } else {
+                // Session expired, clear data
+                set({ user: null, profile: null, session: null });
+              }
+            }).catch(() => {});
+            
+            return;
+          }
+          
+          // No cached data - need to fetch (show loading briefly)
           set({ loading: true });
           
           const { data: { session } } = await supabase.auth.getSession();
           
           if (session?.user) {
-            const profile = await getProfile(session.user.id);
+            // Get profile with short timeout
+            let profile = null;
+            try {
+              const profilePromise = getProfile(session.user.id);
+              const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('timeout')), 3000)
+              );
+              profile = await Promise.race([profilePromise, timeoutPromise]);
+            } catch (e) {
+              // Use metadata as fallback
+              profile = {
+                id: session.user.id,
+                email: session.user.email,
+                full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+                role: session.user.user_metadata?.role || 'customer',
+              };
+            }
+            
             set({
               user: session.user,
               session,
-              profile,
+              profile: profile || {
+                id: session.user.id,
+                email: session.user.email,
+                full_name: session.user.user_metadata?.full_name || 'User',
+                role: session.user.user_metadata?.role || 'customer',
+              },
               loading: false,
+              initialized: true,
               error: null,
             });
           } else {
@@ -33,6 +90,7 @@ const useAuthStore = create(
               session: null,
               profile: null,
               loading: false,
+              initialized: true,
               error: null,
             });
           }
@@ -43,7 +101,8 @@ const useAuthStore = create(
             session: null,
             profile: null,
             loading: false,
-            error: error.message,
+            initialized: true,
+            error: null,
           });
         }
       },
@@ -56,31 +115,31 @@ const useAuthStore = create(
           const { user, session } = await signUp(email, password, fullName, role, phone);
           
           if (user) {
-            // Wait a bit for the trigger to create the profile
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Set user data immediately with metadata
+            set({
+              user,
+              session,
+              profile: {
+                id: user.id,
+                email: user.email,
+                full_name: fullName,
+                role: role,
+              },
+              loading: false,
+              initialized: true,
+            });
             
-            try {
-              const profile = await getProfile(user.id);
-              set({
-                user,
-                session,
-                profile,
-                loading: false,
-              });
-            } catch (profileError) {
-              // Profile might not be created yet, set basic info
-              set({
-                user,
-                session,
-                profile: {
-                  id: user.id,
-                  email: user.email,
-                  full_name: fullName,
-                  role: role,
-                },
-                loading: false,
-              });
-            }
+            // Try to fetch actual profile in background
+            setTimeout(async () => {
+              try {
+                const profile = await getProfile(user.id);
+                if (profile) {
+                  set({ profile });
+                }
+              } catch (e) {
+                // Ignore - we already have basic profile
+              }
+            }, 500);
           }
           
           return { user, session };
@@ -90,7 +149,7 @@ const useAuthStore = create(
         }
       },
 
-      // Sign in
+      // Sign in - optimized for speed
       login: async (email, password) => {
         try {
           set({ loading: true, error: null });
@@ -98,13 +157,26 @@ const useAuthStore = create(
           const { user, session } = await signIn(email, password);
           
           if (user) {
-            const profile = await getProfile(user.id);
+            // Set immediately with user metadata
             set({
               user,
               session,
-              profile,
+              profile: {
+                id: user.id,
+                email: user.email,
+                full_name: user.user_metadata?.full_name || email.split('@')[0],
+                role: user.user_metadata?.role || 'customer',
+              },
               loading: false,
+              initialized: true,
             });
+            
+            // Fetch actual profile in background
+            getProfile(user.id).then(profile => {
+              if (profile) {
+                set({ profile });
+              }
+            }).catch(() => {});
           }
           
           return { user, session };
@@ -181,25 +253,44 @@ const useAuthStore = create(
   )
 );
 
-// Listen for auth changes
+// Listen for auth changes - update state quickly
 supabase.auth.onAuthStateChange(async (event, session) => {
+  console.log('Auth state change:', event);
+  
   if (event === 'SIGNED_IN' && session?.user) {
-    try {
-      const profile = await getProfile(session.user.id);
-      useAuthStore.setState({
-        user: session.user,
-        session,
-        profile,
-        loading: false,
-      });
-    } catch (error) {
-      console.error('Error fetching profile on auth change:', error);
-    }
+    // Update immediately with session data
+    useAuthStore.setState({
+      user: session.user,
+      session,
+      profile: useAuthStore.getState().profile || {
+        id: session.user.id,
+        email: session.user.email,
+        full_name: session.user.user_metadata?.full_name || 'User',
+        role: session.user.user_metadata?.role || 'customer',
+      },
+      loading: false,
+      initialized: true,
+    });
+    
+    // Fetch profile in background
+    getProfile(session.user.id).then(profile => {
+      if (profile) {
+        useAuthStore.setState({ profile });
+      }
+    }).catch(() => {});
+    
   } else if (event === 'SIGNED_OUT') {
     useAuthStore.setState({
       user: null,
       session: null,
       profile: null,
+      loading: false,
+      initialized: true,
+    });
+  } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+    useAuthStore.setState({
+      user: session.user,
+      session,
       loading: false,
     });
   }

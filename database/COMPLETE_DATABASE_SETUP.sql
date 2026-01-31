@@ -240,6 +240,32 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- 6.4 Function to clean up expired medicines (can be called periodically)
+CREATE OR REPLACE FUNCTION cleanup_expired_medicines()
+RETURNS INTEGER AS $$
+DECLARE
+    deleted_count INTEGER;
+BEGIN
+    DELETE FROM medicines 
+    WHERE expiry_date < CURRENT_DATE 
+    AND expiry_date IS NOT NULL;
+    
+    GET DIAGNOSTICS deleted_count = ROW_COUNT;
+    RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 6.5 Function to mark medicines as unavailable when they expire (alternative to deletion)
+CREATE OR REPLACE FUNCTION mark_expired_medicines_unavailable()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.expiry_date < CURRENT_DATE AND NEW.is_available = TRUE THEN
+        NEW.is_available := FALSE;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- =====================================================
 -- Step 7: CREATE TRIGGERS
 -- =====================================================
@@ -270,6 +296,11 @@ CREATE TRIGGER trigger_update_store_rating
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+
+-- Trigger to mark expired medicines as unavailable on any update
+CREATE TRIGGER check_medicine_expiry
+    BEFORE INSERT OR UPDATE ON medicines
+    FOR EACH ROW EXECUTE FUNCTION mark_expired_medicines_unavailable();
 
 -- =====================================================
 -- Step 8: ENABLE ROW LEVEL SECURITY

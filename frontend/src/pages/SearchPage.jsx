@@ -369,7 +369,7 @@ const SearchPage = () => {
             <form onSubmit={handleSearch} className="relative space-y-4">
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Search Input with suggestions */}
-                <div className="relative flex-1">
+                <div className="relative flex-[3] min-w-0">
                   <motion.div
                     className="absolute left-4 top-1/2 -translate-y-1/2"
                     animate={loading ? { rotate: 360 } : {}}
@@ -390,7 +390,7 @@ const SearchPage = () => {
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     placeholder="Search for medicines..."
-                    className="glass-input pl-12 pr-4 text-lg h-14"
+                    className="glass-input pl-12 pr-4 text-lg h-14 w-full min-w-0"
                   />
 
                   {/* Search suggestions dropdown */}
