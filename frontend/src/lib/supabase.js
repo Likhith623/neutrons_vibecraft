@@ -230,8 +230,8 @@ export const logSearch = async (userId, searchTerm, lat = null, lng = null, resu
         {
           user_id: userId,
           search_query: searchTerm,
-          latitude: lat,
-          longitude: lng,
+          user_latitude: lat,
+          user_longitude: lng,
           results_count: resultsCount,
         },
       ])

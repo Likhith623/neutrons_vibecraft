@@ -592,13 +592,13 @@ const SearchPage = () => {
                   </motion.button>
                 </motion.div>
               ) : (
-                <div className={`grid gap-6 ${viewMode === 'map' ? '' : 'lg:grid-cols-5'}`}>
-                  {/* Map Section - 3 columns for larger size */}
+                <div className={`grid gap-4 ${viewMode === 'map' ? '' : 'lg:grid-cols-3'}`}>
+                  {/* Map Section - Takes 2/3 of the space */}
                   <motion.div
                     layout
-                    className={`${viewMode === 'map' ? 'col-span-full' : 'lg:col-span-3'} order-2 lg:order-1`}
+                    className={`${viewMode === 'map' ? 'col-span-full' : 'lg:col-span-2'} order-2 lg:order-1`}
                   >
-                    <div className={`glass-card overflow-hidden ${viewMode === 'map' ? 'h-[600px]' : 'h-[600px]'}`}>
+                    <div className={`glass-card overflow-hidden ${viewMode === 'map' ? 'h-[650px]' : 'h-[650px]'}`}>
                       <MedicineMap
                         stores={transformedStores}
                         selectedMedicine={searchQuery}
@@ -609,202 +609,134 @@ const SearchPage = () => {
                     </div>
                   </motion.div>
 
-                  {/* Results List - 2 columns for narrower width */}
+                  {/* Results List - 1/3 of space, compact cards */}
                   {viewMode !== 'map' && (
                     <motion.div
                       layout
                       initial={{ opacity: 0, x: 30 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="order-1 lg:order-2 lg:col-span-2"
+                      className="order-1 lg:order-2 lg:col-span-1"
                     >
-                      <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                      <div className="space-y-2 max-h-[650px] overflow-y-auto pr-1 custom-scrollbar">
                         {results.map((result, index) => (
                           <motion.div
                             key={result.id}
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            whileHover={{ scale: 1.01, x: 5 }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            whileHover={{ scale: 1.02 }}
                             onClick={() => handleResultClick(result)}
-                            className={`glass-card p-4 cursor-pointer transition-all border-2 relative ${
+                            className={`glass-card p-3 cursor-pointer transition-all border ${
                               selectedResult?.id === result.id
                                 ? 'border-primary-500 bg-primary-500/10'
                                 : index === 0 
-                                  ? 'border-yellow-500/50 bg-yellow-500/5 hover:border-yellow-500'
-                                  : 'border-transparent hover:border-white/20'
+                                  ? 'border-yellow-500/40 bg-yellow-500/5'
+                                  : 'border-white/10 hover:border-white/20'
                             }`}
                           >
-                            {/* NEAREST ribbon - sitting fully outside the box like a crown/ribbon */}
-                            {index === 0 && (
-                              <motion.div
-                                initial={{ scale: 0, rotate: -45, y: -20 }}
-                                animate={{ scale: 1, rotate: -15, y: 0 }}
-                                transition={{ type: 'spring', bounce: 0.5 }}
-                                className="absolute -top-5 -left-2 z-20"
-                                style={{ transformOrigin: 'center center' }}
-                              >
-                                <div className="relative">
-                                  {/* Ribbon tail */}
-                                  <div className="absolute -bottom-1.5 left-1 w-4 h-4 bg-amber-700 transform rotate-45" />
-                                  {/* Main ribbon */}
-                                  <div className="bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 rounded-md px-3 py-1.5 flex items-center gap-1.5 shadow-lg shadow-yellow-500/40 relative">
-                                    <span className="text-lg">👑</span>
-                                    <span className="text-[10px] font-black text-white tracking-widest uppercase">NEAREST</span>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                            
-                            <div className="flex gap-4">
-                              {/* Index Badge - Simple number */}
-                              <div className="flex flex-col items-center">
-                                <motion.div
-                                  whileHover={{ scale: 1.1, rotate: 10 }}
-                                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${
-                                    index === 0 
-                                      ? 'bg-gradient-to-br from-yellow-500 to-amber-600' 
-                                      : 'bg-gradient-to-br from-primary-500 to-purple-600'
-                                  }`}
-                                >
+                            {/* Header Row - Medicine name, price, rank */}
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                  index === 0 
+                                    ? 'bg-gradient-to-br from-yellow-500 to-amber-600' 
+                                    : 'bg-gradient-to-br from-primary-500 to-purple-600'
+                                }`}>
                                   {index + 1}
-                                </motion.div>
-                                <div className={`w-0.5 h-full bg-gradient-to-b ${index === 0 ? 'from-yellow-500/50' : 'from-primary-500/50'} to-transparent mt-2`} />
-                              </div>
-
-                              {/* Medicine & Store Info */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <h3 className="font-semibold text-lg truncate">
-                                        {result.name}
-                                      </h3>
-                                      {index === 0 && (
-                                        <motion.span
-                                          initial={{ scale: 0 }}
-                                          animate={{ scale: 1 }}
-                                          className="px-2 py-0.5 text-xs rounded-full bg-yellow-500/20 text-yellow-400 font-semibold"
-                                        >
-                                          🏆 Best Match
-                                        </motion.span>
-                                      )}
-                                      {result.quantity > 10 && (
-                                        <motion.span
-                                          initial={{ scale: 0 }}
-                                          animate={{ scale: 1 }}
-                                          className="px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400"
-                                        >
-                                          In Stock
-                                        </motion.span>
-                                      )}
-                                    </div>
-                                    {result.generic_name && (
-                                      <p className="text-sm text-white/50 truncate">
-                                        {result.generic_name}
-                                      </p>
-                                    )}
-                                  </div>
-                                  
-                                  <motion.div 
-                                    className="flex items-center gap-1 text-green-400 font-bold text-lg whitespace-nowrap"
-                                    animate={{ scale: selectedResult?.id === result.id ? [1, 1.1, 1] : 1 }}
-                                  >
-                                    <IndianRupee size={18} />
-                                    {result.price}
-                                  </motion.div>
                                 </div>
-
-                                {/* Stats Row with better distance formatting */}
-                                <div className="mt-3 flex items-center gap-3 text-sm text-white/70 flex-wrap">
-                                  <span className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5">
-                                    <Package size={14} className="text-primary-400" />
-                                    {result.quantity} units
-                                  </span>
-                                  <span className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-medium ${
-                                    index === 0 
-                                      ? 'bg-yellow-500/20 text-yellow-400' 
-                                      : result.distance_km < 2 
-                                        ? 'bg-green-500/20 text-green-400'
-                                        : result.distance_km < 5
-                                          ? 'bg-blue-500/20 text-blue-400'
-                                          : 'bg-orange-500/20 text-orange-400'
-                                  }`}>
-                                    <Navigation size={14} />
-                                    {result.distance_km < 1 
-                                      ? `${Math.round(result.distance_km * 1000)}m away`
-                                      : `${result.distance_km.toFixed(1)} km away`}
-                                  </span>
-                                </div>
-
-                                {/* Store Info - Compact */}
-                                <div className="mt-3 pt-3 border-t border-white/10">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-md bg-gradient-to-br from-green-500/20 to-emerald-600/20 flex items-center justify-center flex-shrink-0">
-                                      <MapPin size={12} className="text-green-400" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="font-medium text-primary-400 truncate text-sm">
-                                        {result.stores?.store_name?.length > 20 
-                                          ? result.stores?.store_name.substring(0, 20) + '...' 
-                                          : result.stores?.store_name}
-                                      </p>
-                                      <p className="text-xs text-white/40 truncate">
-                                        {result.stores?.city || result.stores?.address?.split(',')[0]}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="mt-4 flex items-center gap-2">
-                                  <motion.button
-                                    whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' }}
-                                    whileTap={{ scale: 0.98 }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      openDirections(
-                                        result.stores?.latitude,
-                                        result.stores?.longitude
-                                      );
-                                    }}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-purple-600 text-sm font-medium group"
-                                  >
-                                    <Navigation size={16} className="group-hover:animate-bounce" />
-                                    Get Directions
-                                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                                  </motion.button>
-
-                                  <motion.a
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    href={`tel:${result.stores?.phone}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="p-2.5 rounded-xl bg-white/10 hover:bg-green-500/20 transition-colors"
-                                  >
-                                    <Phone size={18} className="text-green-400" />
-                                  </motion.a>
-
-                                  {/* Favorite Button */}
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleFavorite(result);
-                                    }}
-                                    className={`p-2.5 rounded-xl transition-colors ${
-                                      favorites[result.id]
-                                        ? 'bg-red-500/20 hover:bg-red-500/30'
-                                        : 'bg-white/10 hover:bg-red-500/20'
-                                    }`}
-                                  >
-                                    <Heart 
-                                      size={18} 
-                                      className={favorites[result.id] ? 'text-red-400 fill-red-400' : 'text-white/60'}
-                                    />
-                                  </motion.button>
+                                <div className="min-w-0">
+                                  <h3 className="font-semibold text-sm truncate">{result.name}</h3>
+                                  {result.generic_name && (
+                                    <p className="text-xs text-white/40 truncate">{result.generic_name}</p>
+                                  )}
                                 </div>
                               </div>
+                              <div className="text-green-400 font-bold text-sm whitespace-nowrap">
+                                ₹{result.price}
+                              </div>
+                            </div>
+
+                            {/* Stats Row - Units, Distance, Stock */}
+                            <div className="flex items-center gap-2 text-xs mb-2 flex-wrap">
+                              <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/5">
+                                <Package size={10} className="text-primary-400" />
+                                {result.quantity} units
+                              </span>
+                              <span className={`flex items-center gap-1 px-2 py-0.5 rounded font-medium ${
+                                index === 0 
+                                  ? 'bg-yellow-500/20 text-yellow-400' 
+                                  : result.distance_km < 2 
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : 'bg-blue-500/20 text-blue-400'
+                              }`}>
+                                <Navigation size={10} />
+                                {result.distance_km < 1 
+                                  ? `${Math.round(result.distance_km * 1000)}m`
+                                  : `${result.distance_km.toFixed(1)}km`}
+                              </span>
+                              {result.quantity > 10 ? (
+                                <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-400">In Stock</span>
+                              ) : result.quantity > 0 ? (
+                                <span className="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400">Low Stock</span>
+                              ) : null}
+                            </div>
+
+                            {/* Store Info */}
+                            <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5 mb-2">
+                              <MapPin size={12} className="text-green-400 flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-primary-400 text-xs font-medium truncate">
+                                  {result.stores?.store_name}
+                                </p>
+                                <p className="text-[10px] text-white/40 truncate">
+                                  {result.stores?.address}, {result.stores?.city}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Actions Row */}
+                            <div className="flex items-center gap-1.5">
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDirections(result.stores?.latitude, result.stores?.longitude);
+                                }}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-purple-600 text-xs font-medium"
+                              >
+                                <Navigation size={12} />
+                                Directions
+                              </motion.button>
+
+                              <motion.a
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                href={`tel:${result.stores?.phone}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-2 rounded-lg bg-white/10 hover:bg-green-500/20"
+                              >
+                                <Phone size={14} className="text-green-400" />
+                              </motion.a>
+
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleFavorite(result);
+                                }}
+                                className={`p-2 rounded-lg ${
+                                  favorites[result.id]
+                                    ? 'bg-red-500/20'
+                                    : 'bg-white/10 hover:bg-red-500/20'
+                                }`}
+                              >
+                                <Heart 
+                                  size={14} 
+                                  className={favorites[result.id] ? 'text-red-400 fill-red-400' : 'text-white/60'}
+                                />
+                              </motion.button>
                             </div>
                           </motion.div>
                         ))}

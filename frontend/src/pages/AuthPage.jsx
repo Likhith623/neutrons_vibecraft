@@ -93,8 +93,17 @@ const AuthPage = () => {
         }
       }
     } catch (err) {
-      // Show error immediately inline
-      setError(err.message || 'Invalid email or password. Please try again.');
+      // Show error immediately inline with specific message
+      const errorMessage = err.message || '';
+      if (errorMessage.includes('Invalid login credentials') || errorMessage.includes('Invalid email or password')) {
+        setError('Invalid email or password. Please check your credentials and try again.');
+      } else if (errorMessage.includes('Email not confirmed')) {
+        setError('Please verify your email address before logging in.');
+      } else if (errorMessage.includes('registered as a')) {
+        setError(errorMessage);
+      } else {
+        setError(errorMessage || 'Something went wrong. Please try again.');
+      }
       setLoading(false);
     }
   };
