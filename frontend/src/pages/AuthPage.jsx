@@ -12,9 +12,11 @@ import {
   Store,
   ArrowRight,
   Loader2,
+  ArrowLeft,
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
+import { resetPassword } from '../lib/supabase';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,6 +24,9 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState('customer');
   const [error, setError] = useState('');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -37,6 +42,28 @@ const AuthPage = () => {
   const handleChange = (e) => {
     setError('');
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      setError('Please enter your email address.');
+      return;
+    }
+    
+    setForgotLoading(true);
+    setError('');
+    
+    try {
+      await resetPassword(forgotEmail);
+      toast.success('Password reset link sent! Check your email.');
+      setShowForgotPassword(false);
+      setForgotEmail('');
+    } catch (err) {
+      setError(err.message || 'Failed to send reset email. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -328,6 +355,23 @@ const AuthPage = () => {
               </button>
             </div>
 
+            {/* Forgot Password Link (Login Only) */}
+            {isLogin && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(true);
+                    setForgotEmail(formData.email);
+                    setError('');
+                  }}
+                  className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            )}
+
             {/* Submit Button */}
             <motion.button
               type="submit"
@@ -370,6 +414,87 @@ const AuthPage = () => {
           By continuing, you agree to our Terms of Service and Privacy Policy.
         </p>
       </motion.div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotPassword && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowForgotPassword(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass-card p-8 w-full max-w-md"
+            >
+              <button
+                onClick={() => setShowForgotPassword(false)}
+                className="flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-6"
+              >
+                <ArrowLeft size={20} />
+                <span>Back to Login</span>
+              </button>
+
+              <h2 className="text-2xl font-bold mb-2">Reset Password</h2>
+              <p className="text-white/60 mb-6">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 mb-4 text-red-400 text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="relative">
+                  <Mail
+                    size={20}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={forgotEmail}
+                    onChange={(e) => {
+                      setForgotEmail(e.target.value);
+                      setError('');
+                    }}
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 pl-12 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
+                  />
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={forgotLoading}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="glass-button w-full flex items-center justify-center gap-2"
+                >
+                  {forgotLoading ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Mail size={20} />
+                      <span>Send Reset Link</span>
+                    </>
+                  )}
+                </motion.button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

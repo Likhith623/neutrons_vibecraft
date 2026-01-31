@@ -19,6 +19,7 @@ import StoreManagement from './pages/retailer/StoreManagement';
 import InventoryManagement from './pages/retailer/InventoryManagement';
 import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Error Boundary Component to prevent full app crashes
 class ErrorBoundary extends Component {
@@ -176,6 +177,7 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route path="search" element={<SearchPage />} />
 
           {/* Customer Routes */}

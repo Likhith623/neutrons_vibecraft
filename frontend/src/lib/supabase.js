@@ -96,6 +96,36 @@ export const signIn = async (email, password, expectedRole = null) => {
   }
 };
 
+// Send password reset email
+export const resetPassword = async (email) => {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset:', error);
+    throw error;
+  }
+};
+
+// Update password (for use after reset link click)
+export const updatePassword = async (newPassword) => {
+  try {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    
+    if (error) throw error;
+    return { user: data.user };
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error;
+  }
+};
+
 export const signOut = async () => {
   try {
     const { error } = await supabase.auth.signOut();
