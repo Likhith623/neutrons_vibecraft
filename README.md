@@ -1,7 +1,7 @@
 # 💜 HealHeart — Emergency Medicine Locator
 
 <div align="center">
-  <img src="frontend/public/icon.png" alt="HealHeart Logo" width="120" height="120" style="border-radius: 20px;" />
+  <🌐 https://healheart-344002794323.asia-south1.run.app//>
   
   ### *"Because every second counts when lives are at stake"*
   
