@@ -321,7 +321,7 @@ const CustomerHomePage = ({ user }) => {
             className="text-center mb-10"
           >
             <h2 className="text-3xl sm:text-4xl font-bold mb-3">
-              Who is <span className="gradient-text">MediFind</span> For?
+              Who is <span className="gradient-text">HealHeart</span> For?
             </h2>
             <p className="text-white/60">Whether you're searching or selling, we're here for you</p>
           </motion.div>
@@ -634,7 +634,7 @@ const CustomerHomePage = ({ user }) => {
             className="text-center mb-12"
           >
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Why Choose <span className="gradient-text">MediFind</span>?
+              Why Choose <span className="gradient-text">HealHeart</span>?
             </h2>
             <p className="text-white/60 max-w-2xl mx-auto">
               Built for emergencies. Designed to save lives.
@@ -766,10 +766,10 @@ const CustomerHomePage = ({ user }) => {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold">+</span>
             </div>
-            <span className="font-semibold gradient-text">MediFind</span>
+            <span className="font-semibold gradient-text">HealHeart</span>
           </div>
           <p className="text-white/50 text-sm text-center">
-            © 2026 MediFind. Saving lives, one search at a time.
+            © 2026 HealHeart. Saving lives, one search at a time.
           </p>
           <div className="flex items-center gap-4 text-white/50 text-sm">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
@@ -909,7 +909,7 @@ const PharmacyHomePage = ({ user, profile }) => {
                   "You're not just selling medicines — you're giving hope to families in their darkest moments."
                 </p>
                 <p className="text-sm text-white/50">
-                  Thank you for being part of MediFind's mission to save lives.
+                  Thank you for being part of HealHeart's mission to save lives.
                 </p>
               </div>
             </div>
@@ -1048,10 +1048,10 @@ const PharmacyHomePage = ({ user, profile }) => {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
               <span className="text-white font-bold">+</span>
             </div>
-            <span className="font-semibold gradient-text">MediFind Partner</span>
+            <span className="font-semibold gradient-text">HealHeart Partner</span>
           </div>
           <p className="text-white/50 text-sm text-center">
-            © 2026 MediFind. Empowering pharmacies to save lives.
+            © 2026 HealHeart. Empowering pharmacies to save lives.
           </p>
         </div>
       </footer>

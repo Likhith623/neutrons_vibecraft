@@ -62,7 +62,7 @@ const Navbar = () => {
               <span className="text-white font-bold text-xl">+</span>
             </motion.div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
-              MediFind
+              HealHeart
             </span>
           </Link>
 

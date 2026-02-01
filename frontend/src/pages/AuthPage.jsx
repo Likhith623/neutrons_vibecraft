@@ -160,8 +160,8 @@ const AuthPage = () => {
             </h1>
             <p className="text-white/60">
               {isLogin
-                ? 'Sign in to continue to MediFind'
-                : 'Join MediFind to get started'}
+                ? 'Sign in to continue to HealHeart'
+                : 'Join HealHeart to get started'}
             </p>
           </div>
 

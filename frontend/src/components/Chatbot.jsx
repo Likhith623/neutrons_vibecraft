@@ -22,7 +22,7 @@ const Chatbot = ({ onMedicineSearch, initialQuery = null, isOpenExternal = false
     {
       id: 1,
       type: 'bot',
-      text: "Hi! 👋 I'm MedAssist AI, your comprehensive health assistant. Ask me about any medicine, symptoms, health tips, diet, skincare, haircare, or medical treatments. I'm here to help!",
+      text: "Hi! 👋 I'm HealHeart AI, your comprehensive health assistant. Ask me about any medicine, symptoms, health tips, diet, skincare, haircare, or medical treatments. I'm here to help!",
       timestamp: new Date(),
     },
   ]);
@@ -256,7 +256,7 @@ const Chatbot = ({ onMedicineSearch, initialQuery = null, isOpenExternal = false
                     <Bot size={20} className="text-white" />
                   </motion.div>
                   <div>
-                    <h3 className="font-semibold text-white">MedAssist AI</h3>
+                    <h3 className="font-semibold text-white">HealHeart AI</h3>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                       <span className="text-xs text-white/60">Online • Ask anything!</span>
