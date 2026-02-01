@@ -322,9 +322,9 @@ npm install
 #### 3️⃣ Environment Configuration
 Create a `.env` file in the `frontend` directory:
 ```env
-VITE_SUPABASE_URL=https://ahmlknnxexsondeeitgz.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFobWxrbm54ZXhzb25kZWVpdGd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDE2MjQsImV4cCI6MjA4NTQxNzYyNH0.YneOEsdBkMdBxTIGBZ74AWCRFl0IjJlG1suwdpDHmkM
-VITE_GEMINI_API_KEY=AIzaSyBtqHHqsrMxsm-qZ-LoLtdcsUi3CG4ibBE
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
 ```
 
 #### 4️⃣ Run the Application
