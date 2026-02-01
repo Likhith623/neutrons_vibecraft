@@ -38,6 +38,7 @@ jobs:
     - name: Build & Push Image
       working-directory: ./frontend
       run: |
+        echo "Building Docker image..."
         docker build \
           --build-arg VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }} \
           --build-arg VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }} \
@@ -46,15 +47,35 @@ jobs:
           --build-arg VITE_GEMINI_API_KEY=${{ secrets.VITE_GEMINI_API_KEY }} \
           -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }} \
           -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:latest \
+          -f Dockerfile \
           .
+        echo "Pushing Docker image..."
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}
         docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:latest
+        echo "Image pushed successfully!"
+
+    - name: Verify Image
+      run: |
+        echo "Verifying image exists..."
+        gcloud artifacts docker images describe ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }}
 
     - name: Deploy to Cloud Run
       run: |
+        echo "Deploying to Cloud Run..."
         gcloud run deploy ${{ env.SERVICE }} \
           --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.SERVICE }}:${{ github.sha }} \
           --region ${{ env.REGION }} \
           --platform managed \
           --allow-unauthenticated \
-          --port 8080
+          --port 8080 \
+          --cpu 1 \
+          --memory 512Mi \
+          --min-instances 0 \
+          --max-instances 10 \
+          --timeout 300 \
+          --execution-environment gen2
+        echo "Deployment complete!"
+        
+    - name: Show Service URL
+      run: |
+        gcloud run services describe ${{ env.SERVICE }} --region ${{ env.REGION }} --format 'value(status.url)'
