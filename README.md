@@ -12,7 +12,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_LIVE_DEMO-healheart--app-9333EA?style=for-the-badge&labelColor=1f2937)](https://healheart-juzx62eyxq-el.a.run.app/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Likhith623/healheart)
-[![Demo Video](https://img.shields.io/badge/📹_Demo_Video-Watch-FF0000?style=for-the-badge&labelColor=1f2937)](https://github.com/Likhith623/healheart)
+[![Demo Video](https://img.shields.io/badge/📹_Demo_Video-Watch-FF0000?style=for-the-badge&labelColor=1f2937)](https://drive.google.com/file/d/1oa8qrEtJ7RyMY-xCeAXziy0LfBsI4TKE/view)
 
 <br/>
 
@@ -224,42 +224,31 @@
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
-
 ### 👥 For Customers
 
-| Feature | Description |
-|:--------|:------------|
-| 🔍 **Instant Search** | Find medicines across all nearby pharmacies in seconds |
-| 📍 **GPS Navigation** | Turn-by-turn directions to the nearest pharmacy with stock |
-| ⚡ **Real-Time Stock** | Live availability updates from verified pharmacies |
-| 🤖 **AI Health Assistant** | Get medical guidance from HealHeart AI chatbot |
-| ❤️ **Favorites** | Save frequently needed medicines for quick access |
-| 🔔 **Notifications** | Get alerts when out-of-stock medicines become available |
-| 🔐 **Secure Auth** | Email/password with forgot password recovery |
-| 📱 **Mobile Responsive** | Perfect experience on any device |
+| Feature | How It Works |
+|:--------|:-------------|
+| 🔍 **Instant Medicine Search** | Type any medicine name and instantly see all nearby pharmacies that have it in stock. No more calling multiple stores! |
+| 📍 **GPS Navigation** | Get turn-by-turn directions to the nearest pharmacy with your medicine. One tap takes you directly there via Google Maps. |
+| ⚡ **Real-Time Stock Updates** | See live inventory counts updated by pharmacies. Know exactly how many units are available before you travel. |
+| 🤖 **HealHeart AI Assistant** | Chat with our AI-powered medical assistant for health guidance, medicine information, dosage queries, and wellness tips. |
+| ❤️ **Save Favorites** | Save your frequently needed medicines (like chronic medications) for one-tap searching anytime you need them. |
+| 🔔 **Stock Notifications** | Set alerts for out-of-stock medicines. Get notified instantly when they become available at nearby pharmacies. |
+| 🗺️ **Interactive Map View** | Visual map showing all pharmacies near you with color-coded markers indicating stock availability. |
+| 🔐 **Secure Authentication** | Sign up with email/password. Forgot your password? Reset it instantly via email link. |
 
-</td>
-<td width="50%">
+### 🏪 For Pharmacies (Retailers)
 
-### 🏪 For Pharmacies
-
-| Feature | Description |
-|:--------|:------------|
-| 📦 **Inventory Management** | Add/update medicine stock in real-time |
-| 🏬 **Store Management** | Manage multiple pharmacy locations |
-| 📊 **Analytics Dashboard** | View customer searches and trends |
-| 📤 **Bulk Upload** | Import inventory from Excel/CSV |
-| 📸 **Image Upload** | Add store and medicine images |
-| 🎯 **Customer Reach** | Get discovered by thousands of customers |
-| ⏰ **Operating Hours** | Set and display store timings |
-| ✅ **Verification Badge** | Build trust with verified status |
-
-</td>
-</tr>
-</table>
+| Feature | How It Works |
+|:--------|:-------------|
+| 📦 **Inventory Management** | Add, update, or remove medicines from your inventory in real-time. Customers see changes instantly. |
+| 🏬 **Multi-Store Management** | Own multiple pharmacy locations? Manage all of them from a single dashboard with separate inventories. |
+| 📊 **Analytics Dashboard** | View what medicines customers are searching for most. Stock smart based on real demand data. |
+| 📤 **Bulk Upload** | Upload your entire inventory at once using Excel or CSV files. No need to add medicines one by one. |
+| 📸 **Store Images** | Upload photos of your store to build trust. Customers can see your pharmacy before visiting. |
+| 🎯 **Increased Visibility** | Get discovered by thousands of customers searching for medicines in your area. Free marketing! |
+| ⏰ **Operating Hours** | Set your store timings so customers know when you're open. Avoid unnecessary visits during closed hours. |
+| ✅ **Verified Badge** | Get a verified badge to build customer trust and stand out from unverified listings. |
 
 ---
 
@@ -550,69 +539,9 @@ healheart/
 
 <div align="center">
 
-### 🌐 **[https://healheart-344002794323.asia-south1.run.app/](https://healheart-344002794323.asia-south1.run.app/)**
-
-<br/>
-
-### Demo Credentials
-
-| Role | Email | Password |
-|:----:|:------|:---------|
-| 👥 **Customer** | `demo@healheart.com` | `demo123` |
-| 🏪 **Retailer** | `pharmacy@healheart.com` | `pharmacy123` |
+### 🌐 **[https://healheart-juzx62eyxq-el.a.run.app/](https://healheart-juzx62eyxq-el.a.run.app/)**
 
 </div>
-
----
-
-<br/>
-
-## 🖼️ Application Screenshots
-
-<table>
-<tr>
-<td align="center" width="50%">
-
-### 🏠 Home Page
-*Emotional hero section with statistics and call-to-actions*
-
-</td>
-<td align="center" width="50%">
-
-### 🔍 Search Page
-*Real-time medicine search with interactive map*
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-### 🔐 Authentication
-*Beautiful login/register with role selection*
-
-</td>
-<td align="center">
-
-### 📊 Dashboard
-*Customer & retailer management dashboards*
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-### 🤖 AI Chatbot
-*Intelligent medical guidance assistant*
-
-</td>
-<td align="center">
-
-### 📦 Inventory
-*Easy medicine stock management for pharmacies*
-
-</td>
-</tr>
-</table>
 
 ---
 
